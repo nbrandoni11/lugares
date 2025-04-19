@@ -45,9 +45,9 @@
     }
 
     function generarDescripcion(lugar) {
-      const tipo = lugar["Tipo"] || "";
+      const tipo = lugar["Tipo"] || "(sin tipo)";
       const alPaso = lugar["Al paso"] === true ? 'Es al paso. ' : '';
-      const tags = lugar["Tags"] || "";
+      const tags = lugar["Tags"] || "(sin tags)";
       const info = lugar["Data"] || '';
       return `${tipo}. ${alPaso}Tags: ${tags}. ${info}`;
     }
@@ -57,7 +57,12 @@
       contenedor.innerHTML = '';
 
       const filtrados = lugares.filter(lugar => {
-        const texto = `${lugar["Nombre"]} ${lugar["Tipo"]} ${lugar["Tags"]} ${lugar["Data"]}`.toLowerCase();
+        const texto = `
+          ${(lugar["Nombre"] || "")} 
+          ${(lugar["Tipo"] || "")} 
+          ${(lugar["Tags"] || "")} 
+          ${(lugar["Data"] || "")}
+        `.toLowerCase();
         return texto.includes(filtro);
       });
 
@@ -70,7 +75,7 @@
         const div = document.createElement('div');
         div.className = 'lugar';
         div.innerHTML = `
-          <h2>${lugar["Nombre"]}</h2>
+          <h2>${lugar["Nombre"] || "(sin nombre)"}</h2>
           <p>${generarDescripcion(lugar)}</p>
         `;
         contenedor.appendChild(div);
