@@ -52,18 +52,36 @@
       return `${tipo}. ${alPaso}Tags: ${tags}. ${info}`;
     }
 
+    function normalizarTexto(texto) {
+      return (texto || "")
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/s\b/g, ""); // quitar plurales básicos
+    }
+
+    function tokenizar(texto) {
+      return normalizarTexto(texto)
+        .split(/[^\w]+/) // separar por cualquier cosa que no sea palabra
+        .filter(Boolean); // quitar vacíos
+    }
+
     function renderizar(lugares, filtro) {
       const contenedor = document.getElementById('resultados');
       contenedor.innerHTML = '';
 
+      const filtroTokens = tokenizar(filtro);
+
       const filtrados = lugares.filter(lugar => {
         const texto = `
-          ${(lugar["Nombre"] || "")} 
-          ${(lugar["Tipo"] || "")} 
-          ${(lugar["Tags"] || "")} 
-          ${(lugar["Data"] || "")}
-        `.toLowerCase();
-        return texto.includes(filtro);
+          ${lugar["Nombre"] || ""} 
+          ${lugar["Tipo"] || ""} 
+          ${lugar["Tags"] || ""} 
+          ${lugar["Data"] || ""}
+        `;
+        const textoTokens = tokenizar(texto);
+        return filtroTokens.every(ft => textoTokens.some(tt => tt.includes(ft)));
       });
 
       if (filtrados.length === 0) {
@@ -85,7 +103,7 @@
     let todosLosLugares = [];
 
     document.getElementById('busqueda').addEventListener('input', (e) => {
-      const filtro = e.target.value.toLowerCase();
+      const filtro = e.target.value;
       renderizar(todosLosLugares, filtro);
     });
 
