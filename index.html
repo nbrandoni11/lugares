@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lugares curados por mí</title>
+  <style>
+    body {
+      background-color: white;
+      color: black;
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+    }
+    .lugar {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 1rem;
+    }
+    .lugar h2 {
+      margin: 0 0 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lugares curados por mí</h1>
+  <input type="text" id="busqueda" placeholder="Buscar: comida italiana, bar, cozy...">
+  <div id="resultados">Cargando lugares...</div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxG2CAiZNF0DEoHPu_26SePMwgfukSIL46zTf31TVFRs7lBdJ0hq1oE3J1z6cuQJHJj9Q/exec";
+
+    async function cargarLugares() {
+      const res = await fetch(API_URL);
+      const lugares = await res.json();
+      return lugares;
+    }
+
+    function generarDescripcion(lugar) {
+      const tipo = Array.isArray(lugar.tipo) ? lugar.tipo.join(', ') : lugar.tipo;
+      const alPaso = lugar["al paso"] === true ? 'Es al paso. ' : '';
+      const tags = Array.isArray(lugar.tags) ? lugar.tags.join(', ') : lugar.tags;
+      const info = lugar.data || '';
+      return `${tipo}. ${alPaso}Tags: ${tags}. ${info}`;
+    }
+
+    function renderizar(lugares, filtro) {
+      const contenedor = document.getElementById('resultados');
+      contenedor.innerHTML = '';
+
+      const filtrados = lugares.filter(lugar => {
+        const texto = `${lugar.nombre} ${lugar.tipo} ${lugar.tags} ${lugar.data}`.toLowerCase();
+        return texto.includes(filtro);
+      });
+
+      if (filtrados.length === 0) {
+        contenedor.innerHTML = '<p>No se encontraron resultados.</p>';
+        return;
+      }
+
+      filtrados.forEach(lugar => {
+        const div = document.createElement('div');
+        div.className = 'lugar';
+        div.innerHTML = `
+          <h2>${lugar.nombre}</h2>
+          <p>${generarDescripcion(lugar)}</p>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    let todosLosLugares = [];
+
+    document.getElementById('busqueda').addEventListener('input', (e) => {
+      const filtro = e.target.value.toLowerCase();
+      renderizar(todosLosLugares, filtro);
+    });
+
+    cargarLugares().then(data => {
+      todosLosLugares = data;
+      renderizar(data, '');
+    });
+  </script>
+</body>
+</html>
