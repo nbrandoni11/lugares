@@ -40,14 +40,15 @@
     async function cargarLugares() {
       const res = await fetch(API_URL);
       const lugares = await res.json();
+      console.log("Datos recibidos desde Sheets:", lugares);
       return lugares;
     }
 
     function generarDescripcion(lugar) {
-      const tipo = Array.isArray(lugar.tipo) ? lugar.tipo.join(', ') : lugar.tipo;
-      const alPaso = lugar["al paso"] === true ? 'Es al paso. ' : '';
-      const tags = Array.isArray(lugar.tags) ? lugar.tags.join(', ') : lugar.tags;
-      const info = lugar.data || '';
+      const tipo = lugar["Tipo"] || "";
+      const alPaso = lugar["Al paso"] === true ? 'Es al paso. ' : '';
+      const tags = lugar["Tags"] || "";
+      const info = lugar["Data"] || '';
       return `${tipo}. ${alPaso}Tags: ${tags}. ${info}`;
     }
 
@@ -56,7 +57,7 @@
       contenedor.innerHTML = '';
 
       const filtrados = lugares.filter(lugar => {
-        const texto = `${lugar.nombre} ${lugar.tipo} ${lugar.tags} ${lugar.data}`.toLowerCase();
+        const texto = `${lugar["Nombre"]} ${lugar["Tipo"]} ${lugar["Tags"]} ${lugar["Data"]}`.toLowerCase();
         return texto.includes(filtro);
       });
 
@@ -69,7 +70,7 @@
         const div = document.createElement('div');
         div.className = 'lugar';
         div.innerHTML = `
-          <h2>${lugar.nombre}</h2>
+          <h2>${lugar["Nombre"]}</h2>
           <p>${generarDescripcion(lugar)}</p>
         `;
         contenedor.appendChild(div);
